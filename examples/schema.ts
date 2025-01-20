@@ -3,7 +3,6 @@ import "dotenv/config";
 import fs from "fs";
 import { createAzure } from "@ai-sdk/azure";
 import { generateCode } from "../src";
-import { join } from "path";
 
 const azure = createAzure({
   resourceName: process.env.AZURE_RESOURCE_NAME!,
