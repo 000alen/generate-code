@@ -1,22 +1,22 @@
+import "dotenv/config";
+
 import { openai } from "@ai-sdk/openai";
 import { generateCode } from "../src";
 
 async function main() {
   const model = openai("gpt-4o");
-
   const result = await generateCode({
     model,
-    definitions: {
-      "@/types": "export interface MyInterface { name: string; }",
+    declarations: {
+      "types.ts": "export interface User { name: string; }",
     },
     exports: {
-      MyInterface: "MyInterface",
+      user: "User",
     },
-
-    prompt: "Generate an interface for Felipe",
+    prompt: "Generate a user for Felipe",
   });
 
-  console.log(result.code);
+  console.log(result);
 }
 
 main().catch(console.error);

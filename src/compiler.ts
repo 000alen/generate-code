@@ -2,12 +2,11 @@ import * as real_fs from "fs";
 import * as ts from "typescript";
 import { memory_fs } from "@/fs";
 
-export function createCompilerOptions(outFile: string): ts.CompilerOptions {
+export function createCompilerOptions(): ts.CompilerOptions {
   return {
     noEmitOnError: true,
     noImplicitAny: true,
-    outFile,
-    module: ts.ModuleKind.AMD,
+    module: ts.ModuleKind.ESNext,
     jsx: ts.JsxEmit.ReactJSX,
     declaration: true,
     target: ts.ScriptTarget.ESNext,
@@ -27,7 +26,14 @@ export function createCompilerHost(options: ts.CompilerOptions) {
   host.readFile = (fileName: string): string | undefined => {
     try {
       // Try reading from memfs
-      return memory_fs.readFileSync(fileName, "utf8") as string;
+      // return memory_fs.readFileSync(fileName, "utf8") as string;
+      if (memory_fs.existsSync(fileName)) {
+        return memory_fs.readFileSync(fileName, "utf8") as string;
+      } else if (memory_fs.existsSync(`${fileName}.ts`)) {
+        return memory_fs.readFileSync(`${fileName}.ts`, "utf8") as string;
+      }
+
+      throw new Error("File not found");
     } catch {
       try {
         // Fallback to real file system
@@ -39,7 +45,10 @@ export function createCompilerHost(options: ts.CompilerOptions) {
   };
 
   host.fileExists = (fileName: string): boolean => {
-    if (memory_fs.existsSync(fileName)) {
+    if (
+      memory_fs.existsSync(fileName) ||
+      memory_fs.existsSync(`${fileName}.ts`)
+    ) {
       return true;
     } else {
       return real_fs.existsSync(fileName);
@@ -79,7 +88,7 @@ export function createCompilerHost(options: ts.CompilerOptions) {
 export function compile(
   fileNames: string[],
   options: ts.CompilerOptions
-): void {
+): string[] {
   let host = createCompilerHost(options);
 
   let program = ts.createProgram(fileNames, options, host);
@@ -89,30 +98,37 @@ export function compile(
     .getPreEmitDiagnostics(program)
     .concat(emitResult.diagnostics);
 
-  allDiagnostics.forEach((diagnostic) => {
+  // let exitCode = emitResult.emitSkipped ? 1 : 0;
+  // if (exitCode !== 0) {
+  //   console.log("Process exiting with code '1'.");
+  //   throw new Error("Compilation failed");
+  // }
+
+  return allDiagnostics.map((diagnostic) => {
     if (diagnostic.file) {
-      let { line, character } = ts.getLineAndCharacterOfPosition(
-        diagnostic.file,
-        diagnostic.start!
-      );
       let message = ts.flattenDiagnosticMessageText(
         diagnostic.messageText,
         "\n"
       );
-      console.log(
-        `${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`
-      );
+
+      // let { line, character } = ts.getLineAndCharacterOfPosition(
+      //   diagnostic.file,
+      //   diagnostic.start!
+      // );
+      // console.log(
+      //   `${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`
+      // );
+      return message;
     } else {
-      console.log(
-        ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+      // console.log(
+      //   ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+      // );
+      let message = ts.flattenDiagnosticMessageText(
+        diagnostic.messageText,
+        "\n"
       );
+
+      return message;
     }
   });
-
-  let exitCode = emitResult.emitSkipped ? 1 : 0;
-
-  if (exitCode !== 0) {
-    console.log("Process exiting with code '1'.");
-    throw new Error("Compilation failed");
-  }
 }
