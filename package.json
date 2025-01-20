@@ -10,12 +10,13 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx examples/basic.ts"
+    "dev": "tsx examples/azure.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ai-sdk/azure": "^1.1.0",
     "@ai-sdk/openai": "^1.1.0",
     "ai": "^4.1.0",
     "common-tags": "^1.8.2",

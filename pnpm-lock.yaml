@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/azure':
+        specifier: ^1.1.0
+        version: 1.1.0(zod@3.24.1)
       '@ai-sdk/openai':
         specifier: ^1.1.0
         version: 1.1.0(zod@3.24.1)
@@ -38,6 +41,12 @@ importers:
         version: 4.19.2
 
 packages:
+
+  '@ai-sdk/azure@1.1.0':
+    resolution: {integrity: sha512-h9ICuSGHHJ/I0D1JYBLxdn1yP2OlHqGNNZ99tA9EsOWsrTDMHEbsJNcDdnshyL+sogaXzSguB5jVFKxf5s+enw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
 
   '@ai-sdk/openai@1.1.0':
     resolution: {integrity: sha512-D2DaGMK89yYgO32n4Gr7gBJeJGGGS27gdfzYFMRDXlZmKh7VW1WXBp3FXxDwpmt0CgLoVI4qV8lf+gslah+kWw==}
@@ -381,6 +390,13 @@ packages:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
 snapshots:
+
+  '@ai-sdk/azure@1.1.0(zod@3.24.1)':
+    dependencies:
+      '@ai-sdk/openai': 1.1.0(zod@3.24.1)
+      '@ai-sdk/provider': 1.0.4
+      '@ai-sdk/provider-utils': 2.1.0(zod@3.24.1)
+      zod: 3.24.1
 
   '@ai-sdk/openai@1.1.0(zod@3.24.1)':
     dependencies:
