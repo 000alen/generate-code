@@ -1,5 +1,6 @@
 import * as real_fs from "fs";
 import * as ts from "typescript";
+import { IFs } from "memfs";
 import { memory_fs } from "@/fs";
 
 export function createCompilerOptions(): ts.CompilerOptions {
@@ -19,7 +20,7 @@ export function createCompilerOptions(): ts.CompilerOptions {
   };
 }
 
-export function createCompilerHost(options: ts.CompilerOptions) {
+export function createCompilerHost(fs: IFs, options: ts.CompilerOptions) {
   const host = ts.createCompilerHost(options);
 
   // Override methods to use memfs and fallback to real fs
@@ -27,10 +28,10 @@ export function createCompilerHost(options: ts.CompilerOptions) {
     try {
       // Try reading from memfs
       // return memory_fs.readFileSync(fileName, "utf8") as string;
-      if (memory_fs.existsSync(fileName)) {
-        return memory_fs.readFileSync(fileName, "utf8") as string;
-      } else if (memory_fs.existsSync(`${fileName}.ts`)) {
-        return memory_fs.readFileSync(`${fileName}.ts`, "utf8") as string;
+      if (fs.existsSync(fileName)) {
+        return fs.readFileSync(fileName, "utf8") as string;
+      } else if (fs.existsSync(`${fileName}.ts`)) {
+        return fs.readFileSync(`${fileName}.ts`, "utf8") as string;
       }
 
       throw new Error("File not found");
@@ -45,10 +46,7 @@ export function createCompilerHost(options: ts.CompilerOptions) {
   };
 
   host.fileExists = (fileName: string): boolean => {
-    if (
-      memory_fs.existsSync(fileName) ||
-      memory_fs.existsSync(`${fileName}.ts`)
-    ) {
+    if (fs.existsSync(fileName) || fs.existsSync(`${fileName}.ts`)) {
       return true;
     } else {
       return real_fs.existsSync(fileName);
@@ -57,7 +55,7 @@ export function createCompilerHost(options: ts.CompilerOptions) {
 
   host.directoryExists = (dirName: string): boolean => {
     try {
-      return memory_fs.statSync(dirName).isDirectory();
+      return fs.statSync(dirName).isDirectory();
     } catch {
       try {
         return real_fs.statSync(dirName).isDirectory();
@@ -74,7 +72,7 @@ export function createCompilerHost(options: ts.CompilerOptions) {
     onError?: (message: string) => void
   ): void => {
     try {
-      memory_fs.writeFileSync(fileName, data, { encoding: "utf8" });
+      fs.writeFileSync(fileName, data, { encoding: "utf8" });
     } catch (e: unknown) {
       if (onError) onError((e as Error).message);
     }
@@ -89,8 +87,7 @@ export function compile(
   fileNames: string[],
   options: ts.CompilerOptions
 ): string[] {
-  let host = createCompilerHost(options);
-
+  let host = createCompilerHost(memory_fs, options);
   let program = ts.createProgram(fileNames, options, host);
   let emitResult = program.emit();
 
@@ -131,4 +128,20 @@ export function compile(
       return message;
     }
   });
+}
+
+export function createCompiler(fs: IFs, options: ts.CompilerOptions) {
+  return (fileNames: string[]) => {
+    const host = createCompilerHost(fs, options);
+    const program = ts.createProgram(fileNames, options, host);
+    const emitResult = program.emit();
+
+    const diagnostics = ts
+      .getPreEmitDiagnostics(program)
+      .concat(emitResult.diagnostics);
+
+    return diagnostics.map((diagnostic) =>
+      ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+    );
+  };
 }
