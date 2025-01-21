@@ -11,9 +11,10 @@ const azure = createAzure({
 });
 
 export const POST = async (request: Request) => {
-  const { code, compilerErrors } = (await request.json()) as {
+  const { code, compilerErrors, prompt } = (await request.json()) as {
     code: Code;
     compilerErrors: CompilerError[];
+    prompt: string;
   };
 
   const result = await generateCodeWithClient({
@@ -25,7 +26,7 @@ export const POST = async (request: Request) => {
     declarations: {},
     exports: {},
 
-    prompt: "Generate a user for Felipe",
+    prompt,
   });
 
   return new Response(JSON.stringify(result), {
