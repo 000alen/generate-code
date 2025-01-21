@@ -1,9 +1,9 @@
-import { CoreTool } from "ai";
+import { CoreTool, tool } from "ai";
 import { z } from "zod";
 import { Code } from "./types";
 
 export function createWriteTool(code: Code): CoreTool {
-  return {
+  return tool({
     description: "Write a file to the codebase",
     parameters: z.object({
       path: z.string(),
@@ -13,11 +13,11 @@ export function createWriteTool(code: Code): CoreTool {
       // console.log(args, options);
       code[args.path] = args.content;
     },
-  };
+  });
 }
 
 export function createReadTool(code: Code): CoreTool {
-  return {
+  return tool({
     description: "Read a file from the codebase",
     parameters: z.object({
       path: z.string(),
@@ -35,5 +35,5 @@ export function createReadTool(code: Code): CoreTool {
         content: null,
       };
     },
-  };
+  });
 }

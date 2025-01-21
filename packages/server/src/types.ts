@@ -10,6 +10,8 @@ export type Declarations = Record<
   }
 >;
 
+export type CompilerError = string;
+
 export interface GenerateCodeOptions {
   model: LanguageModel;
   declarations: Declarations;
@@ -17,12 +19,16 @@ export interface GenerateCodeOptions {
   tsconfig?: string;
 
   maxSteps?: number;
+  maxIterations?: number;
   prompt?: string;
 
   basePath?: string;
+
+  code?: Code;
+  compilerErrors?: CompilerError[];
 }
 
 export interface GenerateCodeResult {
   readonly code: Code;
-  readonly compilerErrors: string[];
+  readonly compilerErrors: CompilerError[];
 }

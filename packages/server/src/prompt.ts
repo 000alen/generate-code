@@ -1,12 +1,17 @@
-import { Code, Declarations } from "./types";
+import { Code, CompilerError, Declarations } from "./types";
 
-export function getSystemPrompt(
+export function getSystemMessage(
   code: Code,
+  compilerErrors: CompilerError[],
   declarations: Declarations,
   exports: Record<string, string>
 ): string {
   const _code = Object.entries(code)
     .map(([path, content]) => `<file path="${path}">${content}</file>`)
+    .join("\n");
+
+  const _compilerErrors = compilerErrors
+    .map((error) => `<error>${error}</error>`)
     .join("\n");
 
   const _declarations = Object.entries(declarations)
@@ -27,10 +32,24 @@ You are an expert TypeScript developer. You are given a codebase and a set of ty
 Here are the current files in the codebase:
 ${_code}
 
+Here are the compiler errors:
+${_compilerErrors}
+
 Here are the type declarations:
 ${_declarations}
 
 Generate code that exports:
 ${_exports}
+`.trim();
+}
+
+export function getCompilerMessage(compilerErrors: CompilerError[]): string {
+  const _compilerErrors = compilerErrors
+    .map((error) => `<error>${error}</error>`)
+    .join("\n");
+
+  return `
+Here are the compiler errors:
+${_compilerErrors}
 `.trim();
 }

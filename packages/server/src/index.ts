@@ -1,7 +1,7 @@
 import { generateText, CoreMessage } from "ai";
 import { join } from "path";
 import { createCompiler, createCompilerOptions } from "./compiler";
-import { getSystemPrompt } from "./prompt";
+import { getCompilerMessage, getSystemMessage } from "./prompt";
 import { Code } from "./types";
 import { GenerateCodeOptions, GenerateCodeResult } from "./types";
 import { createReadTool, createWriteTool } from "./tools";
@@ -17,21 +17,28 @@ export async function writeCode(fs: IFs, code: Code, basePath: string) {
 export async function generateCode(
   options: GenerateCodeOptions
 ): Promise<GenerateCodeResult> {
-  const {
+  let {
     model,
     declarations,
     exports,
     prompt,
     maxSteps = 10,
+    maxIterations = 10,
     basePath = "/src",
+
+    code = {},
+    compilerErrors = [],
   } = options;
 
-  // const code: Code = Object.fromEntries(
-  //   Object.entries(declarations).map(([path, { content }]) => [path, content])
-  // );
-  const code: Code = {};
-
-  const instructions = getSystemPrompt(code, declarations, exports);
+  const codeWithNoDeclarations = Object.fromEntries(
+    Object.entries(code).filter(([path]) => !declarations[path])
+  );
+  const instructions = getSystemMessage(
+    codeWithNoDeclarations,
+    compilerErrors,
+    declarations,
+    exports
+  );
   const write = createWriteTool(code);
   const read = createReadTool(code);
 
@@ -50,25 +57,51 @@ export async function generateCode(
     },
   ];
 
-  await generateText({
-    model,
-    messages,
-    tools: {
-      write,
-      read,
-    },
-    async onStepFinish(event) {
-      // console.log(event);
-    },
-  });
-
   const { fs } = memfs();
-  await writeCode(fs, code, basePath);
   const compilerOptions = createCompilerOptions();
   const compiler = createCompiler(fs, compilerOptions);
-  const compilerErrors = compiler(
-    Object.keys(code).map((path) => join(basePath, path))
-  );
+
+  for (let i = 0; i < maxIterations; i++) {
+    const result = await generateText({
+      model,
+      messages,
+      tools: {
+        write,
+        read,
+      },
+      maxSteps,
+    });
+
+    await writeCode(fs, code, basePath);
+
+    compilerErrors = compiler(
+      Object.keys(code).map((path) => join(basePath, path))
+    );
+
+    if (compilerErrors.length === 0) break;
+
+    result.toolCalls.forEach((call, i) => {
+      messages.push({
+        role: "tool",
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: call.toolCallId,
+            toolName: call.toolName,
+            result: result.toolResults[i],
+          },
+        ],
+      });
+    });
+    messages.push({
+      role: "assistant",
+      content: result.text,
+    });
+    messages.push({
+      role: "user",
+      content: getCompilerMessage(compilerErrors),
+    });
+  }
 
   return {
     code,
