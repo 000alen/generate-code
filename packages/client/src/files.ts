@@ -10,8 +10,13 @@ export const files = {
         },
         dependencies: {
           typescript: "^5.7.3",
+          react: "^18.3.1",
+          "react-dom": "^18.3.1",
         },
-        devDependencies: {},
+        devDependencies: {
+          "@types/react": "^18.3.1",
+          "@types/react-dom": "^18.3.1",
+        },
       }),
     },
   },
