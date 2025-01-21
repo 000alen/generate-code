@@ -1,6 +1,10 @@
 import { CoreTool, tool } from "ai";
 import { z } from "zod";
 import { Code } from "./types";
+import { IFs } from "memfs";
+import { createCompiler } from "./compiler";
+import { join } from "path";
+import { writeCode } from "./fs";
 
 export function createWriteTool(code: Code): CoreTool {
   return tool({
@@ -37,6 +41,36 @@ export function createReadTool(code: Code): CoreTool {
       return {
         path: args.path,
         content: "",
+      };
+    },
+  });
+}
+
+export function createCheckTool(
+  code: Code,
+  fs: IFs,
+  compiler: ReturnType<typeof createCompiler>,
+  basePath: string
+): CoreTool {
+  return tool({
+    description: "Check if the codebase is correct",
+    parameters: z.object({}),
+    execute: async () => {
+      await writeCode(fs, code, basePath);
+
+      const compilerErrors = compiler(
+        Object.keys(code).map((path) => join(basePath, path))
+      );
+
+      if (compilerErrors.length > 0) {
+        return {
+          status: "error",
+          errors: compilerErrors,
+        };
+      }
+
+      return {
+        status: "success",
       };
     },
   });

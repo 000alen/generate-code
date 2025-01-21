@@ -1,18 +1,9 @@
 import { generateText, CoreMessage } from "ai";
-import { join } from "path";
 import { createCompiler, createCompilerOptions } from "./compiler";
 import { getCompilerMessage, getSystemMessage } from "./prompt";
-import { Code } from "./types";
 import { GenerateCodeOptions, GenerateCodeResult } from "./types";
-import { createReadTool, createWriteTool } from "./tools";
-import { IFs, memfs } from "memfs";
-
-export async function writeCode(fs: IFs, code: Code, basePath: string) {
-  fs.mkdirSync(basePath, { recursive: true });
-  Object.entries(code).forEach(([path, content]) =>
-    fs.writeFileSync(join(basePath, path), content)
-  );
-}
+import { createCheckTool, createReadTool, createWriteTool } from "./tools";
+import { memfs } from "memfs";
 
 export async function generateCode(
   options: GenerateCodeOptions
@@ -39,8 +30,6 @@ export async function generateCode(
     declarations,
     exports
   );
-  const write = createWriteTool(code);
-  const read = createReadTool(code);
 
   Object.entries(declarations).forEach(([path, { content }]) => {
     code[path] = content;
@@ -61,6 +50,10 @@ export async function generateCode(
   const compilerOptions = createCompilerOptions();
   const compiler = createCompiler(fs, compilerOptions);
 
+  const write = createWriteTool(code);
+  const read = createReadTool(code);
+  const check = createCheckTool(code, fs, compiler, basePath);
+
   for (let i = 0; i < maxIterations; i++) {
     const result = await generateText({
       model,
@@ -72,13 +65,17 @@ export async function generateCode(
       maxSteps,
     });
 
-    await writeCode(fs, code, basePath);
-
-    compilerErrors = compiler(
-      Object.keys(code).map((path) => join(basePath, path))
+    const checkResult = await check.execute!(
+      {},
+      {
+        toolCallId: "check",
+        messages,
+      }
     );
 
-    if (compilerErrors.length === 0) break;
+    if (checkResult.status === "success") break;
+
+    compilerErrors = checkResult.errors;
 
     result.toolCalls.forEach((call, i) => {
       messages.push({
