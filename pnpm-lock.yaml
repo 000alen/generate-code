@@ -12,11 +12,17 @@ importers:
         specifier: ^8.1.9
         version: 8.1.9(encoding@0.1.13)
 
-  examples:
+  examples/client:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  examples/server:
     dependencies:
       '@000alen/generate-code-server':
         specifier: workspace:*
-        version: link:../packages/server
+        version: link:../../packages/server
       '@ai-sdk/azure':
         specifier: ^1.1.0
         version: 1.1.0(zod@3.24.1)
