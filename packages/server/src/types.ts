@@ -2,9 +2,17 @@ import { LanguageModel } from "ai";
 
 export type Code = Record<string, string>;
 
+export type Declarations = Record<
+  string,
+  {
+    content: string;
+    context: boolean;
+  }
+>;
+
 export interface GenerateCodeOptions {
   model: LanguageModel;
-  declarations: Code;
+  declarations: Declarations;
   exports: Record<string, string>;
   tsconfig?: string;
 

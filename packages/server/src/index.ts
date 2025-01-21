@@ -26,13 +26,18 @@ export async function generateCode(
     basePath = "/src",
   } = options;
 
-  const code: Code = Object.fromEntries(
-    Object.entries(declarations).map(([path, content]) => [path, content])
-  );
+  // const code: Code = Object.fromEntries(
+  //   Object.entries(declarations).map(([path, { content }]) => [path, content])
+  // );
+  const code: Code = {};
 
   const instructions = getSystemPrompt(code, declarations, exports);
   const write = createWriteTool(code);
   const read = createReadTool(code);
+
+  Object.entries(declarations).forEach(([path, { content }]) => {
+    code[path] = content;
+  });
 
   const messages: CoreMessage[] = [
     {

@@ -1,8 +1,8 @@
-import { Code } from "./types";
+import { Code, Declarations } from "./types";
 
 export function getSystemPrompt(
   code: Code,
-  declarations: Code,
+  declarations: Declarations,
   exports: Record<string, string>
 ): string {
   const _code = Object.entries(code)
@@ -10,8 +10,9 @@ export function getSystemPrompt(
     .join("\n");
 
   const _declarations = Object.entries(declarations)
+    .filter(([_, { context }]) => context)
     .map(
-      ([path, content]) =>
+      ([path, { content }]) =>
         `<declaration path="${path}">${content}</declaration>`
     )
     .join("\n");

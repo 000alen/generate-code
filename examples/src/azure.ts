@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { createAzure } from "@ai-sdk/azure";
-import { generateCode } from "../src";
+import { generateCode } from "@000alen/generate-code-server";
 
 const azure = createAzure({
   resourceName: process.env.AZURE_RESOURCE_NAME!,
@@ -14,7 +14,10 @@ async function main() {
   const result = await generateCode({
     model,
     declarations: {
-      "types.ts": "export interface User { name: string; }",
+      "types.ts": {
+        content: "export interface User { name: string; }",
+        context: true,
+      },
     },
     exports: {
       user: "User",

@@ -8,7 +8,7 @@ export function createCompilerOptions(): ts.CompilerOptions {
     noEmitOnError: true,
     noImplicitAny: true,
     module: ts.ModuleKind.ESNext,
-    jsx: ts.JsxEmit.ReactJSX,
+    jsx: ts.JsxEmit.Preserve,
     declaration: true,
     target: ts.ScriptTarget.ESNext,
     moduleResolution: ts.ModuleResolutionKind.Node10,
@@ -17,6 +17,7 @@ export function createCompilerOptions(): ts.CompilerOptions {
     esModuleInterop: true,
     resolveJsonModule: true,
     noEmitHelpers: false,
+    allowJs: true,
   };
 }
 

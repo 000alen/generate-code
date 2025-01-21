@@ -1,0 +1,22 @@
+{
+  "name": "@000alen/generate-code-examples",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@000alen/generate-code-server": "workspace:*",
+    "@ai-sdk/azure": "^1.1.0",
+    "@ai-sdk/openai": "^1.1.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import fs from "fs";
 import { createAzure } from "@ai-sdk/azure";
-import { generateCode } from "../src";
+import { generateCode } from "@000alen/generate-code-server";
 
 const azure = createAzure({
   resourceName: process.env.AZURE_RESOURCE_NAME!,
@@ -20,7 +20,10 @@ async function main() {
   const result = await generateCode({
     model,
     declarations: {
-      "table.ts": tableDeclaration,
+      "table.ts": {
+        content: tableDeclaration,
+        context: true,
+      },
     },
     exports: {
       table: "Table",
