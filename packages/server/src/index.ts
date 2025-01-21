@@ -108,3 +108,60 @@ export async function generateCode(
     compilerErrors,
   };
 }
+
+export async function generateCodeWithClient(
+  options: Exclude<GenerateCodeOptions, "maxIterations" | "basePath">
+): Promise<GenerateCodeResult> {
+  let {
+    model,
+    declarations,
+    exports,
+    prompt,
+    maxSteps = 10,
+
+    code = {},
+    compilerErrors = [],
+  } = options;
+
+  const codeWithNoDeclarations = Object.fromEntries(
+    Object.entries(code).filter(([path]) => !declarations[path])
+  );
+  const instructions = getSystemMessage(
+    codeWithNoDeclarations,
+    compilerErrors,
+    declarations,
+    exports
+  );
+  const write = createWriteTool(code);
+  const read = createReadTool(code);
+
+  Object.entries(declarations).forEach(([path, { content }]) => {
+    code[path] = content;
+  });
+
+  const messages: CoreMessage[] = [
+    {
+      role: "system",
+      content: instructions,
+    },
+    {
+      role: "user",
+      content: prompt ?? "Generate the code",
+    },
+  ];
+
+  await generateText({
+    model,
+    messages,
+    tools: {
+      write,
+      read,
+    },
+    maxSteps,
+  });
+
+  return {
+    code,
+    compilerErrors,
+  };
+}

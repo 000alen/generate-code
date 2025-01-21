@@ -1,7 +1,7 @@
 import * as real_fs from "fs";
 import * as ts from "typescript";
 import { IFs } from "memfs";
-import { memory_fs } from "@/fs";
+import { memory_fs } from "./fs";
 
 export function createCompilerOptions(): ts.CompilerOptions {
   return {

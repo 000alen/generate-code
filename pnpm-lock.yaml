@@ -20,6 +20,12 @@ importers:
       '@000alen/generate-code-server':
         specifier: workspace:*
         version: link:../../packages/server
+      '@ai-sdk/azure':
+        specifier: ^1.1.0
+        version: 1.1.0(zod@3.24.1)
+      '@tanstack/react-query':
+        specifier: ^5.64.2
+        version: 5.64.2(react@19.0.0)
       next:
         specifier: 15.1.5
         version: 15.1.5(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -85,10 +91,28 @@ importers:
 
   packages/client:
     dependencies:
+      '@000alen/generate-code-server':
+        specifier: workspace:*
+        version: link:../server
+      '@tanstack/react-query':
+        specifier: ^5.64.2
+        version: 5.64.2(react@19.0.0)
       '@webcontainer/api':
         specifier: 1.5.1-internal.6
         version: 1.5.1-internal.6
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.0.0(react@19.0.0)
     devDependencies:
+      '@types/react':
+        specifier: ^19
+        version: 19.0.7
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.0.3(@types/react@19.0.7)
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -844,6 +868,14 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tanstack/query-core@5.64.2':
+    resolution: {integrity: sha512-hdO8SZpWXoADNTWXV9We8CwTkXU88OVWRBcsiFrk7xJQnhm6WRlweDzMD+uH+GnuieTBVSML6xFa17C2cNV8+g==}
+
+  '@tanstack/react-query@5.64.2':
+    resolution: {integrity: sha512-3pakNscZNm8KJkxmovvtZ4RaXLyiYYobwleTMvpIGUoKRa8j8VlrQKNl5W8VUEfVfZKkikvXVddLuWMbcSCA1Q==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tufjs/canonical-json@2.0.0':
     resolution: {integrity: sha512-yVtV8zsdo8qFHe+/3kw81dSLyF7D576A5cCFCi4X7B39tWT7SekaEFUnvnWJHz+9qO7qJTah1JbrDjWKqFtdWA==}
@@ -4527,6 +4559,13 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tanstack/query-core@5.64.2': {}
+
+  '@tanstack/react-query@5.64.2(react@19.0.0)':
+    dependencies:
+      '@tanstack/query-core': 5.64.2
+      react: 19.0.0
 
   '@tufjs/canonical-json@2.0.0': {}
 

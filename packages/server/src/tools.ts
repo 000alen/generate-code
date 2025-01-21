@@ -10,8 +10,12 @@ export function createWriteTool(code: Code): CoreTool {
       content: z.string(),
     }),
     execute: async (args, options) => {
-      // console.log(args, options);
       code[args.path] = args.content;
+
+      return {
+        path: args.path,
+        status: "success",
+      };
     },
   });
 }
@@ -32,7 +36,7 @@ export function createReadTool(code: Code): CoreTool {
 
       return {
         path: args.path,
-        content: null,
+        content: "",
       };
     },
   });
